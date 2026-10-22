@@ -240,7 +240,7 @@
           </div>
           <div>
             <p class="expert-name" data-fill="expertName">[Имя эксперта]</p>
-            <p class="expert-role"><span data-fill="expertRole">[направление]</span></p>
+            <p class="expert-role"><span data-fill="expertRole">[ваш текст]</span></p>
           </div>
         </div>
         <p style="margin:0; color:var(--muted);">Хотите полный бесплатный разбор вашего вопроса? Напишите мне.</p>
@@ -250,21 +250,24 @@
 
         <form class="voice-form" id="leadForm" hidden>
           <div class="field">
-            <label for="leadName">Как к вам обращаться</label>
+            <label for="leadName">Как вас зовут?</label>
             <input type="text" id="leadName" placeholder="Имя" autocomplete="name" />
           </div>
           <div class="field">
-            <label for="leadContact">Куда отправить голосовое</label>
+            <label for="leadQuestion">Ваш вопрос</label>
+            <textarea id="leadQuestion" rows="3" placeholder="Что вы хотите понять?"></textarea>
+          </div>
+          <div class="field">
+            <label for="leadContact">Контакты</label>
             <input type="text" id="leadContact" placeholder="@telegram, почта или телефон" autocomplete="email" />
           </div>
           <label class="consent">
             <input type="checkbox" id="leadConsent" />
-            <span>Согласен(на) на обработку контакта для ответа на вопрос</span>
+            <span>Согласен(а) на обработку персональных данных</span>
           </label>
           <div class="actions">
-            <button class="btn btn-gold" type="submit">Отправить заявку в Telegram</button>
+            <button class="btn btn-gold" type="submit">Получить ответ</button>
           </div>
-          <p class="fine">Откроется Telegram — просто отправьте готовое сообщение. Ответ придёт голосовым на указанный контакт.</p>
           <p class="ok" id="leadOk" hidden>Заявка сформирована — отправьте её в открывшемся Telegram. Эксперт ответит в течение 24 часов.</p>
         </form>
       </div>
@@ -277,7 +280,7 @@
         <h2 style="margin:0 0 10px; font-family:var(--font-display); font-weight:400; font-size:clamp(24px,4.6vw,30px); letter-spacing:0.06em;">Полный личный расклад Таро и индивидуальная консультация</h2>
         <p>Помогу понять себя и ситуацию</p>
         <div class="actions">
-          <a class="btn btn-gold" id="writeBtn" href="#" target="_blank" rel="noopener">Записаться</a>
+          <a class="btn btn-gold" id="writeBtn">Записаться</a>
         </div>
       </div>
     </section>
@@ -300,7 +303,7 @@
     /* ─── НАСТРОЙКИ ─────────────────────────────────────────────── */
     var SETTINGS = {
       expertName: "[Имя эксперта]",
-      expertRole: "[направление]",
+      expertRole: "[ваш текст]",
       expertTg: "tarot_expert",   /* ← username эксперта в Telegram, без @ */
       studio: "Студия IT Event"
     };
@@ -323,9 +326,6 @@
         var k = n.getAttribute("data-fill");
         if (SETTINGS[k] !== undefined) { n.textContent = SETTINGS[k]; }
       });
-      var tg = "https://t.me/" + SETTINGS.expertTg;
-      var wb = $("#writeBtn");
-      if (wb) { wb.setAttribute("href", tg); }
     }
 
     /* ─── медальон: солнце + 8 секторов карт ───────────────────── */
@@ -418,6 +418,9 @@
     $("#voiceBtn").addEventListener("click", function () {
       var f = $("#leadForm");
       f.hidden = !f.hidden;
+      if (!f.hidden && $("#leadQuestion") && !$("#leadQuestion").value.trim()) {
+        $("#leadQuestion").value = $("#question").value.trim();
+      }
       track("voice_open");
       if (!f.hidden) {
         try {
@@ -432,7 +435,7 @@
       var contact = $("#leadContact").value.trim();
       if (!contact) { alert("Укажите контакт, куда отправить голосовое."); return; }
       if (!$("#leadConsent").checked) { alert("Нужно согласие на обработку контакта."); return; }
-      var q = $("#question").value.trim() || "—";
+      var q = ($("#leadQuestion") ? $("#leadQuestion").value.trim() : "") || $("#question").value.trim() || "—";
       var msg = "Здравствуйте! Хочу голосовой разбор.\n" +
                 "Вопрос: «" + q + "»\n" +
                 "Карта дня: " + (currentCard ? currentCard.ru : "—") + "\n" +
